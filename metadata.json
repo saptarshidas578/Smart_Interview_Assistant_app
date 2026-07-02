@@ -1,0 +1,11 @@
+{
+  "name": "Remix: AI Interview Copilot",
+  "description": "An interactive, adaptive AI mock interview platform with live speech-to-text, real-time feedback, speech analytics, and performance report cards.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

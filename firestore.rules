@@ -1,0 +1,96 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Primitive Helpers
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidInterviewSession(data) {
+      return data.keys().hasAll(['id', 'config', 'turns', 'startTime', 'status'])
+        && data.id is string && data.id.size() <= 128
+        && data.config is map
+        && data.turns is list
+        && data.startTime is string && data.startTime.size() <= 64
+        && data.status is string && (data.status == 'idle' || data.status == 'ongoing' || data.status == 'completed')
+        && (!data.keys().hasAny(['endTime']) || (data.endTime is string && data.endTime.size() <= 64))
+        && (!data.keys().hasAny(['finalReport']) || data.finalReport is map)
+        && (!data.keys().hasAny(['userId']) || (data.userId is string && data.userId.size() <= 128));
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'totalScore', 'sessionsCount', 'streak', 'dailyGoals'])
+        && data.uid is string && data.uid.size() <= 128
+        && data.email is string && data.email.size() <= 128
+        && data.displayName is string && data.displayName.size() <= 128
+        && data.totalScore is number
+        && data.sessionsCount is number
+        && data.streak is number
+        && data.dailyGoals is list
+        && (!data.keys().hasAny(['lastActiveDate']) || (data.lastActiveDate is string && data.lastActiveDate.size() <= 64));
+    }
+
+    // 3. Fortress Rules for Sessions Collection
+    match /sessions/{sessionId} {
+      // Validate single document targets & list queries
+      allow get: if isValidId(sessionId);
+      allow list: if true; // allow listing session histories for standard display
+
+      allow create: if isValidId(sessionId)
+        && incoming().id == sessionId
+        && isValidInterviewSession(incoming());
+        
+      allow update: if isValidId(sessionId)
+        && incoming().id == sessionId
+        && isValidInterviewSession(incoming())
+        // Immutable constraints
+        && incoming().id == existing().id
+        && incoming().startTime == existing().startTime
+        // State lock: Cannot modify completed sessions
+        && existing().status != 'completed'
+        // Allowed transitions: idle -> ongoing -> completed
+        && (incoming().status == existing().status || (
+          (existing().status == 'idle' && incoming().status == 'ongoing') ||
+          (existing().status == 'ongoing' && incoming().status == 'completed')
+        ));
+
+      allow delete: if isValidId(sessionId);
+    }
+
+    // 4. Fortress Rules for Users Collection
+    match /users/{userId} {
+      allow get: if isValidId(userId);
+      allow list: if true; // Everyone can see the leaderboard/scoreboard
+
+      allow create: if isValidId(userId)
+        && request.auth != null
+        && request.auth.uid == userId
+        && incoming().uid == userId
+        && isValidUserProfile(incoming());
+        
+      allow update: if isValidId(userId)
+        && request.auth != null
+        && request.auth.uid == userId
+        && incoming().uid == userId
+        && isValidUserProfile(incoming())
+        && incoming().uid == existing().uid
+        && incoming().email == existing().email;
+
+      allow delete: if false; // profiles cannot be deleted
+    }
+  }
+}

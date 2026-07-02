@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif: "Georgia", ui-serif, Cambria, serif;
+
+  /* Premium gold theme colors matching the Sophisticated Dark design */
+  --color-gold-500: #B99362;
+  --color-gold-400: #D4B483;
+  --color-gold-600: #A37E50;
+  
+  --color-dark-950: #0A0A0B;
+  --color-dark-900: #111113;
+  --color-dark-850: #0D0D0F;
+  --color-dark-800: #161618;
+}
+
+/* Custom styles for grid background dots or glowing badges */
+.bg-dots {
+  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Glowing animations */
+@keyframes pulse-gold {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(185, 147, 98, 0.4);
+  }
+  50% {
+    opacity: .8;
+    box-shadow: 0 0 20px rgba(185, 147, 98, 0.7);
+  }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}

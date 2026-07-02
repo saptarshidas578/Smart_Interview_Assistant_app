@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "InterviewSession": {
+      "title": "InterviewSession",
+      "description": "An interactive mock interview session with candidate configuration, step-by-step turns, speech analytics, and performance evaluation.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the session"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who owns this session"
+        },
+        "config": {
+          "type": "object",
+          "description": "The mock interview setup configuration"
+        },
+        "turns": {
+          "type": "array",
+          "description": "A collection of interviewer turns containing question, candidate answer, speech analytics, attention metrics, and evaluation"
+        },
+        "startTime": {
+          "type": "string",
+          "description": "ISO timestamp indicating when the session began"
+        },
+        "endTime": {
+          "type": "string",
+          "description": "ISO timestamp indicating when the session concluded"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["idle", "ongoing", "completed"],
+          "description": "Current status of the interview session"
+        },
+        "finalReport": {
+          "type": "object",
+          "description": "The AI-generated performance report card summary"
+        }
+      },
+      "required": ["id", "config", "turns", "startTime", "status"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with cumulative score, streak, active date, and personalized daily goals.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Unique user ID from Firebase Authentication"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User's nickname or chosen display name"
+        },
+        "totalScore": {
+          "type": "integer",
+          "description": "Cumulative score earned through mock interview sessions"
+        },
+        "sessionsCount": {
+          "type": "integer",
+          "description": "Total number of completed sessions"
+        },
+        "streak": {
+          "type": "integer",
+          "description": "Daily interview practice streak"
+        },
+        "lastActiveDate": {
+          "type": "string",
+          "description": "Last date of activity (YYYY-MM-DD)"
+        },
+        "dailyGoals": {
+          "type": "array",
+          "description": "List of personalized daily goals with completion states"
+        }
+      },
+      "required": ["uid", "email", "displayName", "totalScore", "sessionsCount", "streak", "dailyGoals"]
+    }
+  },
+  "firestore": {
+    "/sessions/{sessionId}": {
+      "schema": "InterviewSession",
+      "description": "Collection of mock interview sessions saved by candidates"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Collection of user profiles with scores, streaks, and personalized daily goals"
+    }
+  }
+}
